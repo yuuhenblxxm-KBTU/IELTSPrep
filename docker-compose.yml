@@ -1,0 +1,77 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ──
+  db:
+    image: postgres:16-alpine
+    container_name: ielts_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ielts_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ielts_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-ielts_db}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ielts_user} -d ${POSTGRES_DB:-ielts_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── pgAdmin 4 ──
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: ielts_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@ielts.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── FastAPI Backend ──
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ielts_backend
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ielts_user}:${POSTGRES_PASSWORD:-ielts_pass}@db:5432/${POSTGRES_DB:-ielts_db}
+      SECRET_KEY: ${SECRET_KEY:-supersecretkey123change_this}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      CORS_ORIGINS: http://localhost:4200,http://localhost
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ── Angular Frontend ──
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ielts_frontend
+    restart: unless-stopped
+    ports:
+      - "4200:4200"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:
+  pgadmin_data:

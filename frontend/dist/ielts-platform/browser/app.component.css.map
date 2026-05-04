@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["angular:styles/component:css;a00e719834e1bd075c30991a16d7b823e507b25e22d076e494d7a5a6ec3462e2;C:/Users/adore/ielts-platform/frontend/src/app/app.component.ts"],
+  "sourcesContent": ["\n    .app-shell {\n      display: flex;\n      height: 100vh;\n      overflow: hidden;\n    }\n    .main-area {\n      flex: 1;\n      display: flex;\n      flex-direction: column;\n      overflow: hidden;\n    }\n    .content {\n      flex: 1;\n      overflow-y: auto;\n      padding: 28px 32px;\n      background: var(--bg);\n    }\n  "],
+  "mappings": ";AACI,CAAC;AACC,WAAS;AACT,UAAQ;AACR,YAAU;AACZ;AACA,CAAC;AACC,QAAM;AACN,WAAS;AACT,kBAAgB;AAChB,YAAU;AACZ;AACA,CAAC;AACC,QAAM;AACN,cAAY;AACZ,WAAS,KAAK;AACd,cAAY,IAAI;AAClB;",
+  "names": []
+}
